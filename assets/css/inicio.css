@@ -1,0 +1,36 @@
+main#contentAjax {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.center {
+    margin: auto;
+}
+
+.bloque.bloquePrincipal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 600px;
+}
+
+.flex.center.bloquesTests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 10px;
+    width: 100%;
+}
+
+div#bloqueTestClonar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    width: 100p;
+}
