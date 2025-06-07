@@ -1,2 +1,2 @@
-- [ ] Las misiones necesitan crearse como posttype
+- [x] Las misiones necesitan crearse como posttype
 - [ ] El chat, los mensajes no aparecen en orden.

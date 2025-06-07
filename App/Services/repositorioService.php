@@ -1,7 +1,11 @@
 <?php
 
 use Glory\Class\ManejadorGit;
+use Glory\Class\PostActionManager;
 
+/**
+ * Clona o actualiza un repositorio y crea/actualiza un CPT 'repositorio' asociado.
+ */
 function clonarRepo()
 {
     if (!is_user_logged_in()) {
@@ -25,10 +29,9 @@ function clonarRepo()
     }
 
     $nombreRepoBase = basename(parse_url($urlRepo, PHP_URL_PATH), '.git');
-
-    $nombreRepoUnico      = $nombreRepoBase . '_' . $idUsuario;
+    $nombreRepoUnico = $nombreRepoBase . '_' . $idUsuario;
     $rutaBaseRepositorios = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'repositorios';
-    $rutaLocalRepo        = $rutaBaseRepositorios . DIRECTORY_SEPARATOR . $nombreRepoUnico;
+    $rutaLocalRepo = $rutaBaseRepositorios . DIRECTORY_SEPARATOR . $nombreRepoUnico;
 
     if (!is_dir($rutaBaseRepositorios)) {
         if (!wp_mkdir_p($rutaBaseRepositorios)) {
@@ -47,23 +50,66 @@ function clonarRepo()
     $exito = $manejadorGit->clonarOActualizarRepo($urlRepo, $rutaLocalRepo, $ramaTrabajo);
 
     if ($exito) {
+        // Actualizar metas del usuario
         update_user_meta($idUsuario, 'metaRutaLocalRepo', wp_normalize_path($rutaLocalRepo));
         update_user_meta($idUsuario, 'metaUltimaClonacionExitosa', current_time('timestamp'));
         update_user_meta($idUsuario, 'metaRepoClonadoUrl', $urlRepo);
         update_user_meta($idUsuario, 'metaRepoClonadoBranch', $ramaTrabajo);
 
+        // Buscar si ya existe un CPT para este repositorio y usuario
+        $repositorioExistente = get_posts([
+            'post_type'  => 'repositorio',
+            'author'     => $idUsuario,
+            'meta_key'   => 'urlRepositorio',
+            'meta_value' => $urlRepo,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+        ]);
+
+        $idPostRepositorio = 0;
+        $datosMeta = [
+            'urlRepositorio' => $urlRepo,
+            'ramaTrabajo'    => $ramaTrabajo,
+            'rutaLocal'      => wp_normalize_path($rutaLocalRepo),
+        ];
+
+        if (empty($repositorioExistente)) {
+            // No existe, crear nuevo CPT 'repositorio'
+            $datosParaPost = [
+                'post_title'   => $nombreRepoBase,
+                'post_content' => "Repositorio {$nombreRepoBase} clonado desde {$urlRepo} (rama: {$ramaTrabajo}).",
+                'post_author'  => $idUsuario,
+                'meta_input'   => $datosMeta,
+            ];
+            $idPostRepositorio = PostActionManager::crearPost('repositorio', $datosParaPost);
+        } else {
+            // Ya existe, actualizar metas si es necesario
+            $idPostRepositorio = $repositorioExistente[0];
+            foreach ($datosMeta as $key => $value) {
+                update_post_meta($idPostRepositorio, $key, $value);
+            }
+        }
+
+        if (is_wp_error($idPostRepositorio) || $idPostRepositorio === 0) {
+            error_log("clonarRepo: Error al crear o actualizar el CPT para el repositorio {$urlRepo}.");
+        } else {
+            // Guardar el ID del CPT 'repositorio' en la meta del usuario para fácil acceso
+            update_user_meta($idUsuario, 'metaIdPostRepositorio', $idPostRepositorio);
+        }
+
         wp_send_json_success([
             'mensaje'          => "El repositorio '{$nombreRepoBase}' ha sido clonado/actualizado correctamente.",
+            'idPostRepositorio' => $idPostRepositorio,
             'rutaRepositorio'  => $rutaLocalRepo,
             'urlRepositorio'   => $urlRepo,
-            'ramaSeleccionada' => $ramaTrabajo
+            'ramaSeleccionada' => $ramaTrabajo,
         ]);
     } else {
         error_log("clonarRepo: Fallo al clonar/actualizar repo '{$urlRepo}' en '{$rutaLocalRepo}'. Rama: '{$ramaTrabajo}'.");
         wp_send_json_error([
-            'mensaje'        => "Error al clonar o actualizar el repositorio '{$nombreRepoBase}'. Consulte los registros del sistema para detalles.",
+            'mensaje'        => "Error al clonar o actualizar el repositorio '{$nombreRepoBase}'.",
             'urlRepositorio' => $urlRepo,
-            'rutaIntentada'  => $rutaLocalRepo
+            'rutaIntentada'  => $rutaLocalRepo,
         ], 500);
     }
 }

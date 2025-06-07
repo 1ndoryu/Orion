@@ -128,7 +128,6 @@ function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson
         $textoGenerado = $datosRespuesta['candidates'][0]['content']['parts'][0]['text'];
         
         if ($esperarJson) {
-            // Asumo que limpiarYParsearJsonInterno existe y maneja el caso de string no-JSON.
             $jsonParseado = limpiarYParsearJsonInterno($textoGenerado); 
             if ($jsonParseado === null && !empty($textoGenerado)) { // Solo loguear error de parseo si habia texto
                 error_log('api: Se esperaba JSON pero no se pudo parsear la respuesta de la API: ' . substr($textoGenerado, 0, 500));
@@ -149,4 +148,32 @@ function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson
         error_log($mensajeError);
         return null;
     }
+}
+
+function limpiarYParsearJsonInterno($texto)
+{
+    if (empty($texto) || !is_string($texto)) {
+        return null;
+    }
+    
+    // CAMBIO CLAVE: Usar una expresión regular para encontrar el bloque JSON.
+    // Esta regex busca un texto que empiece con { y termine con } (o [ y ])
+    // y captura todo lo que hay en medio, incluyendo anidaciones.
+    // El modificador 's' (DOTALL) permite que '.' incluya saltos de línea.
+    preg_match('/({.*}|\[.*\])/s', $texto, $matches);
+
+    if (empty($matches[0])) {
+        // No se encontró ninguna estructura que parezca JSON.
+        return null;
+    }
+
+    $jsonString = $matches[0];
+    $datos = json_decode($jsonString, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log('limpiarYParsearJsonInterno: Fallo al decodificar el JSON extraído. Error: ' . json_last_error_msg() . '. String: ' . $jsonString);
+        return null;
+    }
+
+    return $datos;
 }
