@@ -1,5 +1,5 @@
 <?php
-use Glory\Class\PostActionManager;
+use Glory\PostActionManager;
 
 /**
  * Borra todas las misiones (CPT 'mision') de un usuario.

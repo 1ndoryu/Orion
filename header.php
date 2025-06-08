@@ -20,7 +20,17 @@
         </div>
 
         <div class="buscador">
-
+            <input type="search"
+                id="busquedaPrincipal"
+                class="busqueda"
+                placeholder="Ingresa tu busqueda"
+                data-tipos="misiones,perfiles"
+                data-cantidad="5"
+                data-target="#resultado"
+                data-renderer="renderizadorGeneral"
+                data-callback-show="mostrarFondo"
+                data-callback-hide="ocultarFondo"
+                autocomplete="off">
         </div>
 
         <div class="end">

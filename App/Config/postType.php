@@ -1,5 +1,5 @@
 <?
-use Glory\Class\PostTypeManager;
+use Glory\Core\PostTypeManager;
 
 PostTypeManager::define(
     'mision',

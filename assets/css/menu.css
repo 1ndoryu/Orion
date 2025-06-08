@@ -56,7 +56,6 @@ body {
     overflow: hidden;
 }
 
-
 .icons {
     display: flex;
     flex-direction: column;
@@ -79,3 +78,26 @@ body {
     height: 16px;
     cursor: pointer;
 }
+
+.buscador {
+    margin: auto;
+    width: 100%;
+    display: flex;
+}
+
+.busqueda {
+    background: none;
+    border: solid 1px #252525;
+    border-radius: 5px;
+    padding: 4px 10px !important;
+    font-size: 11px;
+    max-width: 300px;
+    width: 100%;
+    line-height: 1.5;
+    margin: auto;
+}
+
+.busqueda::placeholder {
+    font-size: 10px;
+}
+

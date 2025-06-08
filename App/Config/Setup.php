@@ -1,8 +1,8 @@
 <?php 
 
-use Glory\Class\PageManager;
-use Glory\Class\ScriptManager;
-use Glory\Class\StyleManager;
+use Glory\Core\PageManager;
+use Glory\Core\ScriptManager;
+use Glory\Core\StyleManager;
 
 ScriptManager::setGlobalDevMode(true);
 ScriptManager::setThemeVersion('0.1.2');

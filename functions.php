@@ -2,8 +2,6 @@
 
 $directorioTemaActivo = get_stylesheet_directory();
 
-
-
 $autoloader = get_template_directory() . '/vendor/autoload.php';
 if (file_exists($autoloader)) {
     require_once $autoloader;
@@ -34,9 +32,7 @@ function incluirArchivos($directorio)
 
     $archivos = glob($ruta_completa . "*.php");
     foreach ($archivos as $archivo) {
-        if (strpos($archivo, 'Glory/Class/ServidorChat.php') === false) {
-            include_once $archivo;
-        }
+        include_once $archivo;
     }
 
     $subdirectorios = glob($ruta_completa . "*/", GLOB_ONLYDIR);

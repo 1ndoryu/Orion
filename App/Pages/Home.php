@@ -7,11 +7,15 @@ function home()
 ?>
 
     <div class="pestanaContenido" data-pestana="uno">
+        <div class="buscadorBL bloque">
+            <input  class="buscadorLocal" placeholder="Ingresa tu busqueda"></input>
 
+            <div class="resultadosBusqueda"></div>
+        </div>
     </div>
 
     <div class="pestanaContenido" data-pestana="dos">
-
+        
     </div>
 
 <?

@@ -1,7 +1,7 @@
 <?php
 
-use Glory\Class\ManejadorGit;
-use Glory\Class\PostActionManager;
+use Glory\Services\ManejadorGit;
+use Glory\Services\PostActionManager;
 
 /**
  * Clona o actualiza un repositorio y crea/actualiza un CPT 'repositorio' asociado.

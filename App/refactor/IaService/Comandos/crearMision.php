@@ -1,6 +1,6 @@
 <?php
 // App/Services/IaService/Comandos/crearMision.php
-use Glory\Class\PostActionManager;
+use Glory\PostActionManager;
 
 /**
  * Orquesta el proceso de creación de una misión.
