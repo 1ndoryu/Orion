@@ -3,6 +3,9 @@
 use Glory\Class\ManejadorGit;
 use Glory\Class\PostActionManager;
 
+define('DEFAULT_REPO_URL', 'https://github.com/1ndoryu/Glory.git');
+define('DEFAULT_REPO_BRANCH', 'main');
+
 /**
  * Clona o actualiza un repositorio y crea/actualiza un CPT 'repositorio' asociado.
  */
@@ -14,30 +17,18 @@ function clonarRepo()
     }
 
     $idUsuario = get_current_user_id();
+    $params = _prepararParametrosClonacion($idUsuario);
 
-    $urlRepoPorDefecto     = 'https://github.com/1ndoryu/Glory.git';
-    $ramaTrabajoPorDefecto = 'main';
+    $urlRepo = $params['urlRepo'];
+    $ramaTrabajo = $params['ramaTrabajo'];
+    $nombreRepoBase = $params['nombreRepoBase'];
+    // $nombreRepoUnico = $params['nombreRepoUnico']; // No se usa directamente en clonarRepo después de esta extracción
+    $rutaBaseRepositorios = $params['rutaBaseRepositorios'];
+    $rutaLocalRepo = $params['rutaLocalRepo'];
 
-    $urlRepo = get_user_meta($idUsuario, 'metaRepo', true);
-    if (empty($urlRepo) || !filter_var($urlRepo, FILTER_VALIDATE_URL)) {
-        $urlRepo = $urlRepoPorDefecto;
-    }
-
-    $ramaTrabajo = get_user_meta($idUsuario, 'ramaTrabajo', true);
-    if (empty($ramaTrabajo)) {
-        $ramaTrabajo = $ramaTrabajoPorDefecto;
-    }
-
-    $nombreRepoBase = basename(parse_url($urlRepo, PHP_URL_PATH), '.git');
-    $nombreRepoUnico = $nombreRepoBase . '_' . $idUsuario;
-    $rutaBaseRepositorios = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'repositorios';
-    $rutaLocalRepo = $rutaBaseRepositorios . DIRECTORY_SEPARATOR . $nombreRepoUnico;
-
-    if (!is_dir($rutaBaseRepositorios)) {
-        if (!wp_mkdir_p($rutaBaseRepositorios)) {
-            error_log('clonarRepo: Error al crear directorio de repositorios: ' . $rutaBaseRepositorios);
-            wp_send_json_error(['mensaje' => 'Error al configurar el directorio de repositorios.'], 500);
-        }
+    if (!_gestionarDirectorioRepositorio($rutaBaseRepositorios)) {
+        // Error ya logueado y wp_send_json_error llamado en el helper
+        return;
     }
 
     try {
@@ -50,56 +41,12 @@ function clonarRepo()
     $exito = $manejadorGit->clonarOActualizarRepo($urlRepo, $rutaLocalRepo, $ramaTrabajo);
 
     if ($exito) {
-        // Actualizar metas del usuario
-        update_user_meta($idUsuario, 'metaRutaLocalRepo', wp_normalize_path($rutaLocalRepo));
-        update_user_meta($idUsuario, 'metaUltimaClonacionExitosa', current_time('timestamp'));
-        update_user_meta($idUsuario, 'metaRepoClonadoUrl', $urlRepo);
-        update_user_meta($idUsuario, 'metaRepoClonadoBranch', $ramaTrabajo);
-
-        // Buscar si ya existe un CPT para este repositorio y usuario
-        $repositorioExistente = get_posts([
-            'post_type'  => 'repositorio',
-            'author'     => $idUsuario,
-            'meta_key'   => 'urlRepositorio',
-            'meta_value' => $urlRepo,
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-        ]);
-
-        $idPostRepositorio = 0;
-        $datosMeta = [
-            'urlRepositorio' => $urlRepo,
-            'ramaTrabajo'    => $ramaTrabajo,
-            'rutaLocal'      => wp_normalize_path($rutaLocalRepo),
-        ];
-
-        if (empty($repositorioExistente)) {
-            // No existe, crear nuevo CPT 'repositorio'
-            $datosParaPost = [
-                'post_title'   => $nombreRepoBase,
-                'post_content' => "Repositorio {$nombreRepoBase} clonado desde {$urlRepo} (rama: {$ramaTrabajo}).",
-                'post_author'  => $idUsuario,
-                'meta_input'   => $datosMeta,
-            ];
-            $idPostRepositorio = PostActionManager::crearPost('repositorio', $datosParaPost);
-        } else {
-            // Ya existe, actualizar metas si es necesario
-            $idPostRepositorio = $repositorioExistente[0];
-            foreach ($datosMeta as $key => $value) {
-                update_post_meta($idPostRepositorio, $key, $value);
-            }
-        }
-
-        if (is_wp_error($idPostRepositorio) || $idPostRepositorio === 0) {
-            error_log("clonarRepo: Error al crear o actualizar el CPT para el repositorio {$urlRepo}.");
-        } else {
-            // Guardar el ID del CPT 'repositorio' en la meta del usuario para fácil acceso
-            update_user_meta($idUsuario, 'metaIdPostRepositorio', $idPostRepositorio);
-        }
+        _actualizarMetasUsuarioPostClonacion($idUsuario, $rutaLocalRepo, $urlRepo, $ramaTrabajo);
+        $idPostRepositorio = _gestionarPostRepositorio($idUsuario, $urlRepo, $ramaTrabajo, $nombreRepoBase, $rutaLocalRepo);
 
         wp_send_json_success([
             'mensaje'          => "El repositorio '{$nombreRepoBase}' ha sido clonado/actualizado correctamente.",
-            'idPostRepositorio' => $idPostRepositorio,
+            'idPostRepositorio' => $idPostRepositorio, // Usar el ID devuelto por el helper
             'rutaRepositorio'  => $rutaLocalRepo,
             'urlRepositorio'   => $urlRepo,
             'ramaSeleccionada' => $ramaTrabajo,
@@ -112,6 +59,101 @@ function clonarRepo()
             'rutaIntentada'  => $rutaLocalRepo,
         ], 500);
     }
+}
+
+function _prepararParametrosClonacion($idUsuario)
+{
+    $urlRepo = get_user_meta($idUsuario, 'metaRepo', true);
+    if (empty($urlRepo) || !filter_var($urlRepo, FILTER_VALIDATE_URL)) {
+        $urlRepo = DEFAULT_REPO_URL;
+    }
+
+    $ramaTrabajo = get_user_meta($idUsuario, 'ramaTrabajo', true);
+    if (empty($ramaTrabajo)) {
+        $ramaTrabajo = DEFAULT_REPO_BRANCH;
+    }
+
+    $nombreRepoBase = basename(parse_url($urlRepo, PHP_URL_PATH), '.git');
+    $nombreRepoUnico = $nombreRepoBase . '_' . $idUsuario;
+    $rutaBaseRepositorios = WP_CONTENT_DIR . DIRECTORY_SEPARATOR . 'repositorios';
+    $rutaLocalRepo = $rutaBaseRepositorios . DIRECTORY_SEPARATOR . $nombreRepoUnico;
+
+    return [
+        'urlRepo'             => $urlRepo,
+        'ramaTrabajo'         => $ramaTrabajo,
+        'nombreRepoBase'      => $nombreRepoBase,
+        'nombreRepoUnico'     => $nombreRepoUnico,
+        'rutaBaseRepositorios' => $rutaBaseRepositorios,
+        'rutaLocalRepo'       => $rutaLocalRepo,
+    ];
+}
+
+function _gestionarDirectorioRepositorio($rutaBaseRepositorios)
+{
+    if (!is_dir($rutaBaseRepositorios)) {
+        if (!wp_mkdir_p($rutaBaseRepositorios)) {
+            error_log('_gestionarDirectorioRepositorio: Error al crear directorio de repositorios: ' . $rutaBaseRepositorios);
+            wp_send_json_error(['mensaje' => 'Error al configurar el directorio de repositorios.'], 500);
+            return false;
+        }
+    }
+    return true;
+}
+
+function _actualizarMetasUsuarioPostClonacion($idUsuario, $rutaLocalRepo, $urlRepo, $ramaTrabajo)
+{
+    update_user_meta($idUsuario, 'metaRutaLocalRepo', wp_normalize_path($rutaLocalRepo));
+    update_user_meta($idUsuario, 'metaUltimaClonacionExitosa', current_time('timestamp'));
+    update_user_meta($idUsuario, 'metaRepoClonadoUrl', $urlRepo);
+    update_user_meta($idUsuario, 'metaRepoClonadoBranch', $ramaTrabajo);
+}
+
+function _gestionarPostRepositorio($idUsuario, $urlRepo, $ramaTrabajo, $nombreRepoBase, $rutaLocalRepo)
+{
+    // Buscar si ya existe un CPT para este repositorio y usuario
+    $repositorioExistente = get_posts([
+        'post_type'  => 'repositorio',
+        'author'     => $idUsuario,
+        'meta_key'   => 'urlRepositorio',
+        'meta_value' => $urlRepo,
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+    ]);
+
+    $idPostRepositorio = 0;
+    $datosMeta = [
+        'urlRepositorio' => $urlRepo,
+        'ramaTrabajo'    => $ramaTrabajo,
+        'rutaLocal'      => wp_normalize_path($rutaLocalRepo),
+    ];
+
+    if (empty($repositorioExistente)) {
+        // No existe, crear nuevo CPT 'repositorio'
+        $datosParaPost = [
+            'post_title'   => $nombreRepoBase,
+            'post_content' => "Repositorio {$nombreRepoBase} clonado desde {$urlRepo} (rama: {$ramaTrabajo}).",
+            'post_author'  => $idUsuario,
+            'meta_input'   => $datosMeta,
+        ];
+        $idPostRepositorio = PostActionManager::crearPost('repositorio', $datosParaPost);
+    } else {
+        // Ya existe, actualizar metas si es necesario
+        $idPostRepositorio = $repositorioExistente[0];
+        foreach ($datosMeta as $key => $value) {
+            update_post_meta($idPostRepositorio, $key, $value);
+        }
+    }
+
+    if (is_wp_error($idPostRepositorio) || $idPostRepositorio === 0) {
+        error_log("_gestionarPostRepositorio: Error al crear o actualizar el CPT para el repositorio {$urlRepo}. ID Post: " . print_r($idPostRepositorio, true));
+        // No se envía error JSON aquí para no interrumpir el flujo si la clonación fue exitosa pero el CPT falló.
+        // El log es importante. Se podría considerar devolver un error si el CPT es crítico.
+        return 0; // O algún indicador de error
+    } else {
+        // Guardar el ID del CPT 'repositorio' en la meta del usuario para fácil acceso
+        update_user_meta($idUsuario, 'metaIdPostRepositorio', $idPostRepositorio);
+    }
+    return $idPostRepositorio;
 }
 
 add_action('wp_ajax_clonarRepo', 'clonarRepo');

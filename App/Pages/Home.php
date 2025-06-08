@@ -2,6 +2,14 @@
 
 function home()
 {
+    // Define default repo values if not already defined globally
+    if (!defined('DEFAULT_REPO_URL')) {
+        define('DEFAULT_REPO_URL', 'https://github.com/1ndoryu/Glory.git');
+    }
+    if (!defined('DEFAULT_REPO_BRANCH')) {
+        define('DEFAULT_REPO_BRANCH', 'main');
+    }
+
     ob_start();
     ?>
     
@@ -18,18 +26,18 @@ function home()
                 $repoClonadoBranch = get_user_meta($idUsuario, 'metaRepoClonadoBranch', true);
 
                 if (empty($urlRepo) || !filter_var($urlRepo, FILTER_VALIDATE_URL)) {
-                    $urlRepo = 'https://github.com/1ndoryu/Glory.git';
+                    $urlRepo = DEFAULT_REPO_URL;
                 }
 
                 if (empty($ramaTrabajo)) {
-                    $ramaTrabajo = 'main';
+                    $ramaTrabajo = DEFAULT_REPO_BRANCH;
                 }
 
                 ?>
-                <p>Ruta Local: <? echo esc_html($rutaLocalRepo ? wp_normalize_path($rutaLocalRepo) : 'No establecida') ?></p>
-                <p>Última Clonación: <? echo $ultimaClonacion ? date('Y-m-d H:i:s', $ultimaClonacion) : 'Nunca' ?></p>
-                <p>Repo Clonado URL: <? echo esc_html($repoClonadoUrl ?: 'No clonado') ?></p>
-                <p>Repo Clonado Branch: <? echo esc_html($repoClonadoBranch ?: 'No clonado') ?></p>
+                <p>Ruta Local: <?php echo esc_html($rutaLocalRepo ? wp_normalize_path($rutaLocalRepo) : 'No establecida') ?></p>
+                <p>Última Clonación: <?php echo $ultimaClonacion ? date('Y-m-d H:i:s', $ultimaClonacion) : 'Nunca' ?></p>
+                <p>Repo Clonado URL: <?php echo esc_html($repoClonadoUrl ?: 'No clonado') ?></p>
+                <p>Repo Clonado Branch: <?php echo esc_html($repoClonadoBranch ?: 'No clonado') ?></p>
             </div>
             <button class="primario botonprincipal" id="clonarBoton">Clonar</button>
         </div>
@@ -42,14 +50,14 @@ function home()
 
             </div>
             <div class="inputChat">
-                <input type="text" id="mensajeUsuarioChat" placeholder="Escribe tu mensaje aquí..." style="width: 80%; padding: 10px; margin-right: 5px;">
-                <button id="enviarMensajeChat" class="primario" style="padding: 10px;">Enviar</button>
+                <input type="text" id="mensajeUsuarioChat" placeholder="Escribe tu mensaje aquí...">
+                <button id="enviarMensajeChat" class="primario">Enviar</button>
             </div>
         </div>
 
     </div>
     
-    <?
+    <?php
     $content = ob_get_contents();
     ob_end_clean();
     return $content;

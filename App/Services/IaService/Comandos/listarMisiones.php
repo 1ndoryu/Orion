@@ -2,7 +2,7 @@
 /**
  * Lista todas las misiones (CPT 'mision') de un usuario específico.
  */
-function comandoListarMisiones($idUsuario, &$promptsEnviados, &$respuestasIaIntermedias)
+function comandoListarMisiones($idUsuario)
 {
     $args = [
         'post_type'      => 'mision',

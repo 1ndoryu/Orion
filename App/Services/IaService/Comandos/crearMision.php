@@ -2,6 +2,9 @@
 // App/Services/IaService/Comandos/crearMision.php
 use Glory\Class\PostActionManager;
 
+define('MAX_ANALISIS_ITERACIONES', 4);
+define('MAX_CONTENIDO_RESUMEN_CHARS', 25000);
+
 /**
  * Orquesta el proceso de creación de una misión.
  * Coordina la preparación, el análisis de archivos, la definición por IA y el guardado.
@@ -95,7 +98,7 @@ function analizarArchivosRelevantes($idUsuario, $idPostRepositorio, $rutaReposit
     $resumenesContexto = '';
     $archivosYaSeleccionadosRutas = [];
 
-    for ($i = 1; $i <= 4; $i++) {
+    for ($i = 1; $i <= MAX_ANALISIS_ITERACIONES; $i++) {
         $archivosDisponibles = array_diff($archivosRepo, $archivosYaSeleccionadosRutas);
         if (empty($archivosDisponibles)) {
             #Depuración detallada
@@ -179,7 +182,7 @@ function obtenerOcrearResumenArchivo($idUsuario, $idPostRepositorio, $rutaComple
         wp_delete_post($resumenCacheado->ID, true);
     }
 
-    $promptResumen = "Contexto: Estoy tratando de cumplir esta instrucción de usuario: \"{$instruccionOriginal}\".\nTarea: Has elegido este archivo para analizar. Resume su propósito y las funciones clave que contiene, posibilidades de refactorización, posibles problemas, posibles, vulnerabilidades, dudas. Este resumen servirá de contexto para decidir qué archivo analizar a continuación. Sé conciso y técnico. Responde únicamente con un JSON que contenga la clave 'resumen'.\n\n--- INICIO CONTENIDO: {$archivoAAnalizar} ---\n" . substr($contenidoArchivo, 0, 25000) . "\n--- FIN CONTENIDO ---";
+    $promptResumen = "Contexto: Estoy tratando de cumplir esta instrucción de usuario: \"{$instruccionOriginal}\".\nTarea: Has elegido este archivo para analizar. Resume su propósito y las funciones clave que contiene, posibilidades de refactorización, posibles problemas, posibles, vulnerabilidades, dudas. Este resumen servirá de contexto para decidir qué archivo analizar a continuación. Sé conciso y técnico. Responde únicamente con un JSON que contenga la clave 'resumen'.\n\n--- INICIO CONTENIDO: {$archivoAAnalizar} ---\n" . substr($contenidoArchivo, 0, MAX_CONTENIDO_RESUMEN_CHARS) . "\n--- FIN CONTENIDO ---";
     #Depuración detallada
     enviarMensajeSocket($idUsuario, ['success' => true, 'tipo' => 'prompt-sistema', 'mensaje' => $promptResumen]);
     $respuestaResumen = api($promptResumen, null, null, true);

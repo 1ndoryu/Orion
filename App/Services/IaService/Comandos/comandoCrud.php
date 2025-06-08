@@ -1,6 +1,8 @@
 <?php
 // App/Services/IaService/Comandos/comandoCrud.php
 
+define('MODELO_DECISION_COMANDO', 'gemma-3-27b-it');
+
 function gestionarComandosIA($instruccion, $idUsuario)
 {
     //luego aqui el parametro activara un funcion especifica sin consultar a respuestaDecisionIa
@@ -26,7 +28,7 @@ function gestionarComandosIA($instruccion, $idUsuario)
     $promptsEnviados['decisionComandoGeneral'] = $promptComando;
     enviarMensajeSocket($idUsuario, ['success' => true, 'tipo' => 'prompt-sistema', 'mensaje' => $promptComando]);
 
-    $respuestaDecisionIa = api($promptComando, null, null, true, [], [], 'gemma-3-27b-it');
+    $respuestaDecisionIa = api($promptComando, null, null, true, [], [], MODELO_DECISION_COMANDO);
 
     $respuestasIaIntermedias['decisionComandoGeneral'] = $respuestaDecisionIa;
     enviarMensajeSocket($idUsuario, ['success' => true, 'tipo' => 'respuesta-ia', 'mensaje' => $respuestaDecisionIa]);
@@ -54,7 +56,7 @@ function gestionarComandosIA($instruccion, $idUsuario)
     if (isset($respuestaDecisionIa['crearMision']) && $respuestaDecisionIa['crearMision'] === true) {
         $motivoMisionIa = $respuestaDecisionIa['motivoMision'] ?? 'No especificado por la IA.';
         enviarMensajeSocket($idUsuario, ['success' => true, 'tipo' => 'estado', 'mensaje' => "Intención reconocida: Crear misión.\nMotivo: \"{$motivoMisionIa}\""]);
-        return comandoCrearMision($idUsuario, $instruccion, $motivoMisionIa, $promptsEnviados, $respuestasIaIntermedias);
+        return comandoCrearMision($idUsuario, $instruccion, $motivoMisionIa);
     }
 
     enviarMensajeSocket($idUsuario, ['success' => true, 'tipo' => 'estado', 'mensaje' => 'No se detectó un comando específico, procesando como chat general...']);

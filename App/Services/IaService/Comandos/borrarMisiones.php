@@ -4,7 +4,7 @@ use Glory\Class\PostActionManager;
 /**
  * Borra todas las misiones (CPT 'mision') de un usuario.
  */
-function comandoBorrarTodasMisiones($idUsuario, &$promptsEnviados, &$respuestasIaIntermedias)
+function comandoBorrarTodasMisiones($idUsuario)
 {
     $args = [
         'post_type'      => 'mision',

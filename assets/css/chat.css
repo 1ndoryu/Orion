@@ -57,6 +57,8 @@
 
 #mensajeUsuarioChat {
     flex-grow: 1;
+    width: 80%; /* Added from Home.php inline style */
+    margin-right: 5px; /* Added from Home.php inline style */
     padding: 10px 12px;
     background-color: #252526; /* Fondo oscuro para input */
     color: #d4d4d4; /* Texto claro para input */

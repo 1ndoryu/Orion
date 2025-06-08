@@ -1,31 +1,38 @@
 <?php
 // App/Services/IaService/api.php
 
-function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson = false, $configuracionGeneracion = [], $configuracionSeguridad = [], $modeloId = 'gemini-2.5-flash-preview-05-20')
+define('DEFAULT_API_MODEL_ID', 'gemini-2.5-flash-preview-05-20');
+
+function _obtenerClaveApiPredeterminada($idUsuario)
 {
-    $idUsuario = get_current_user_id();
+    $claveApi = get_user_meta($idUsuario, 'googleApiKey', true);
 
-    $apiKey = get_user_meta($idUsuario, 'googleApiKey', true);
-
-    if (empty($apiKey) && current_user_can('administrator')) {
+    if (empty($claveApi) && current_user_can('administrator')) {
         if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
-            $apiKey = GOOGLE_API_KEY;
+            $claveApi = GOOGLE_API_KEY;
         } else {
             $envKey = getenv('GOOGLE_API_KEY');
             if ($envKey !== false && !empty($envKey)) {
-                $apiKey = $envKey;
+                $claveApi = $envKey;
             } elseif (isset($_ENV['GOOGLE_API_KEY']) && !empty($_ENV['GOOGLE_API_KEY'])) {
-                $apiKey = $_ENV['GOOGLE_API_KEY'];
+                $claveApi = $_ENV['GOOGLE_API_KEY'];
             }
         }
     }
+    return $claveApi;
+}
 
-    if (empty($apiKey)) {
-        error_log('api: No se encontró una API key válida para Google API (verificado meta, constante, getenv y $_ENV).');
+function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson = false, $configuracionGeneracion = [], $configuracionSeguridad = [], $modeloId = DEFAULT_API_MODEL_ID)
+{
+    $idUsuario = get_current_user_id();
+    $claveApi = _obtenerClaveApiPredeterminada($idUsuario);
+
+    if (empty($claveApi)) {
+        error_log('api: No se encontró una clave API válida para Google API.');
         return null;
     }
 
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modeloId}:generateContent?key={$apiKey}";
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modeloId}:generateContent?key={$claveApi}";
 
     $partesContenido   = [];
     $partesContenido[] = ['text' => $prompt];
@@ -49,78 +56,33 @@ function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson
     }
 
     $cuerpoSolicitud = ['contents' => [['parts' => $partesContenido]]];
-
-
-    $currentGenerationConfig = [
-        'temperature'       => 0.5,
-        'max_output_tokens' => 60000,
-    ];
-
-    if (strpos($modeloId, 'flash') !== false) {
-        $currentGenerationConfig['thinking_config'] = ['thinking_budget' => 0];
-    }
-
-    $currentGenerationConfig = array_merge($currentGenerationConfig, $configuracionGeneracion);
-
-    if (isset($currentGenerationConfig['thinking_config']) &&
-        ($currentGenerationConfig['thinking_config'] === null || $currentGenerationConfig['thinking_config'] === false)) {
-        unset($currentGenerationConfig['thinking_config']);
-    }
-
-    $responseMimeType = isset($currentGenerationConfig['response_mime_type']) ? $currentGenerationConfig['response_mime_type'] : null;
-
-    if (strpos($modeloId, 'gemma') !== false) {
-        $responseMimeType = 'text/plain';
-        if ($esperarJson) {
-            error_log("api: Se solicitó JSON ($esperarJson=true) pero el modelo es Gemma ({$modeloId}), que solo admite 'text/plain'. La solicitud a la API se hará con 'text/plain'.");
-        }
-    } elseif ($esperarJson) {
-        // Si se espera JSON y NO es Gemma, se usa application/json.
-        $responseMimeType = 'application/json';
-    } elseif ($responseMimeType === null) {
-        // Si no es Gemma, no se espera JSON explícitamente, y el usuario no especificó un mime_type,
-        // el default general es text/plain.
-        $responseMimeType = 'text/plain';
-    }
-    // Asignar el responseMimeType determinado al config final
-    $currentGenerationConfig['response_mime_type'] = $responseMimeType;
     
-    $cuerpoSolicitud['generation_config'] = $currentGenerationConfig;
+    $cuerpoSolicitud['generation_config'] = _construirConfiguracionGeneracion($modeloId, $esperarJson, $configuracionGeneracion);
+    $cuerpoSolicitud['safety_settings'] = _construirConfiguracionSeguridad($configuracionSeguridad);
 
-    // Configuración de seguridad
-    $configSeguridadPorDefecto          = [
-        ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
-        ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
-        ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
-        ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
-    ];
-    $cuerpoSolicitud['safety_settings'] = array_merge($configSeguridadPorDefecto, $configuracionSeguridad);
+    $curlResult = _ejecutarSolicitudCurl($url, json_encode($cuerpoSolicitud));
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($cuerpoSolicitud));
+    $httpCode = $curlResult['httpCode'];
+    $respuestaCurl = $curlResult['responseBody'];
+    $curlError = $curlResult['curlError'];
 
-    $respuestaCurl = curl_exec($ch);
+    return _procesarRespuestaCurl($httpCode, $respuestaCurl, $curlError, $esperarJson);
+}
 
-    if (curl_errno($ch)) {
-        $mensajeError = 'api: Error en CURL: ' . curl_error($ch);
-        error_log($mensajeError);
-        curl_close($ch);
+function _procesarRespuestaCurl($httpCode, $responseBody, $curlError, $esperarJson)
+{
+    if ($curlError) {
+        // El error ya fue logueado en _ejecutarSolicitudCurl
         return null;
     }
 
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    $datosRespuesta = json_decode($respuestaCurl, true);
+    $datosRespuesta = json_decode($responseBody, true);
 
     if ($httpCode >= 400) {
-        $mensajeError = "api: Error HTTP {$httpCode}. Respuesta: " . $respuestaCurl;
+        $mensajeError = "_procesarRespuestaCurl: Error HTTP {$httpCode}. Respuesta: " . $responseBody;
         error_log($mensajeError);
         if (isset($datosRespuesta['error']['message'])) {
-            error_log('api: Mensaje de error de la API: ' . $datosRespuesta['error']['message']);
+            error_log('_procesarRespuestaCurl: Mensaje de error de la API: ' . $datosRespuesta['error']['message']);
         }
         return null;
     }
@@ -131,24 +93,93 @@ function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson
         if ($esperarJson) {
             $jsonParseado = limpiarYParsearJsonInterno($textoGenerado); 
             if ($jsonParseado === null && !empty($textoGenerado)) { // Solo loguear error de parseo si habia texto
-                error_log('api: Se esperaba JSON pero no se pudo parsear la respuesta de la API: ' . substr($textoGenerado, 0, 500));
+                error_log('_procesarRespuestaCurl: Se esperaba JSON pero no se pudo parsear la respuesta de la API: ' . substr($textoGenerado, 0, 500));
             }
             return $jsonParseado;
         }
         return $textoGenerado;
     } elseif (isset($datosRespuesta['promptFeedback']['blockReason'])) {
         $razonBloqueo = $datosRespuesta['promptFeedback']['blockReason'];
-        $mensajeError = "api: Prompt bloqueado por la API. Razón: {$razonBloqueo}.";
+        $mensajeError = "_procesarRespuestaCurl: Prompt bloqueado por la API. Razón: {$razonBloqueo}.";
         if (isset($datosRespuesta['promptFeedback']['safetyRatings'])) {
             $mensajeError .= ' Ratings: ' . json_encode($datosRespuesta['promptFeedback']['safetyRatings']);
         }
         error_log($mensajeError);
         return null;
     } else {
-        $mensajeError = 'api: Respuesta inesperada de la API o falta el texto generado. Respuesta: ' . $respuestaCurl;
+        $mensajeError = '_procesarRespuestaCurl: Respuesta inesperada de la API o falta el texto generado. Respuesta: ' . $responseBody;
         error_log($mensajeError);
         return null;
     }
+}
+
+function _ejecutarSolicitudCurl($urlConClave, $cuerpoSolicitudJson)
+{
+    $ch = curl_init($urlConClave);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $cuerpoSolicitudJson);
+
+    $respuestaCurl = curl_exec($ch);
+    $curlError = null;
+
+    if (curl_errno($ch)) {
+        $curlError = curl_error($ch);
+        error_log('_ejecutarSolicitudCurl: Error en CURL: ' . $curlError);
+        // No retornamos null aquí directamente, dejamos que el llamador decida basado en curlError
+    }
+
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return ['httpCode' => $httpCode, 'responseBody' => $respuestaCurl, 'curlError' => $curlError];
+}
+
+function _construirConfiguracionGeneracion($modeloId, $esperarJson, $configuracionUsuario)
+{
+    $configuracionGeneracionActual = [
+        'temperature'       => 0.5,
+        'max_output_tokens' => 60000,
+    ];
+
+    if (strpos($modeloId, 'flash') !== false) {
+        $configuracionGeneracionActual['thinking_config'] = ['thinking_budget' => 0];
+    }
+
+    $configuracionGeneracionActual = array_merge($configuracionGeneracionActual, $configuracionUsuario);
+
+    if (isset($configuracionGeneracionActual['thinking_config']) &&
+        ($configuracionGeneracionActual['thinking_config'] === null || $configuracionGeneracionActual['thinking_config'] === false)) {
+        unset($configuracionGeneracionActual['thinking_config']);
+    }
+
+    $responseMimeType = isset($configuracionGeneracionActual['response_mime_type']) ? $configuracionGeneracionActual['response_mime_type'] : null;
+
+    if (strpos($modeloId, 'gemma') !== false) {
+        $responseMimeType = 'text/plain';
+        if ($esperarJson) {
+            error_log("_construirConfiguracionGeneracion: Se solicitó JSON ($esperarJson=true) pero el modelo es Gemma ({$modeloId}), que solo admite 'text/plain'. La solicitud a la API se hará con 'text/plain'.");
+        }
+    } elseif ($esperarJson) {
+        $responseMimeType = 'application/json';
+    } elseif ($responseMimeType === null) {
+        $responseMimeType = 'text/plain';
+    }
+
+    $configuracionGeneracionActual['response_mime_type'] = $responseMimeType;
+    return $configuracionGeneracionActual;
+}
+
+function _construirConfiguracionSeguridad($configuracionUsuario)
+{
+    $configSeguridadPorDefecto = [
+        ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+        ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+        ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+        ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+    ];
+    return array_merge($configSeguridadPorDefecto, $configuracionUsuario);
 }
 
 function limpiarYParsearJsonInterno($texto)
