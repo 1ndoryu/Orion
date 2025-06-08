@@ -6,8 +6,8 @@ function configurarChatIA() {
     const inputMensaje = bloqueChat.querySelector('#mensajeUsuarioChat');
     const botonEnviar = bloqueChat.querySelector('#enviarMensajeChat');
     const estadoConexion = document.createElement('div');
-    estadoConexion.className = 'estado-conexion-ws';
-    bloqueChat.insertBefore(estadoConexion, bloqueChat.firstChild);
+    //estadoConexion.className = 'estado-conexion-ws';
+    //bloqueChat.insertBefore(estadoConexion, bloqueChat.firstChild);
 
     const idUsuario = window.gloryAjaxNavConfig?.idUsuario || null;
 

@@ -196,9 +196,13 @@ pre {
 
 div#bloqueTestChat {
     width: 100%;
-    height: calc(100vh - 20px);
+    height: 100%;
 }
 
 div#bloqueTestClonar {
     display: none !important;
+}
+
+#bloqueTestChat .variables {
+    display: none;
 }
