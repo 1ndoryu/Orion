@@ -34,7 +34,9 @@ function incluirArchivos($directorio)
 
     $archivos = glob($ruta_completa . "*.php");
     foreach ($archivos as $archivo) {
-        include_once $archivo;
+        if (strpos($archivo, 'Glory/Class/ServidorChat.php') === false) {
+            include_once $archivo;
+        }
     }
 
     $subdirectorios = glob($ruta_completa . "*/", GLOB_ONLYDIR);

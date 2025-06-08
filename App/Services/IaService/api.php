@@ -1,4 +1,5 @@
-<?php 
+<?php
+// App/Services/IaService/api.php
 
 function api($prompt, $rutaArchivo = null, $mimeTypeArchivo = null, $esperarJson = false, $configuracionGeneracion = [], $configuracionSeguridad = [], $modeloId = 'gemini-2.5-flash-preview-05-20')
 {
