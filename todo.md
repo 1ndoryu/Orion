@@ -82,7 +82,7 @@ A continuación se detalla el flujo de trabajo actualizado que incluye el ciclo 
     * [ ] Añadir lógica para detectar el payload `{ "accionRequerida": "pedirContextoAdicional" }`.
     * [ ] Al recibirlo, establecer una variable de estado global (ej: `window.estadoMision = 'esperandoContexto'`).
 
-* [ ] **Actualizar la Lógica de Envío de Mensajes (Wrapper de `GloryAjax`):**
+* [ ] **Actualizar la Lógica de Envío de Mensajes (Wrapper de `gloryAjax`):**
     * [ ] Antes de enviar un mensaje, comprobar el valor de `window.estadoMision`.
     * [ ] Si es `'esperandoContexto'`, modificar el payload de la petición AJAX para que incluya la acción de continuación (ej: `{ accion: 'continuarMision', instruccion: '...' }`).
     * [ ] Restablecer el estado `window.estadoMision = null` después de enviar la petición.

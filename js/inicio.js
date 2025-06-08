@@ -10,7 +10,7 @@ function iniciarClonar() {
         botonClonar.textContent = 'Clonando...';
 
         try {
-            const respuesta = await GloryAjax('clonarRepo', datosPeticion);
+            const respuesta = await gloryAjax('clonarRepo', datosPeticion);
             if (respuesta && respuesta.success) {
                 let mensaje = 'Página clonada con éxito.';
                 if (respuesta.data && respuesta.data.nueva_url) {
@@ -32,4 +32,4 @@ function iniciarClonar() {
     botonClonar.addEventListener('click', manejarClickClonar);
 }
 
-document.addEventListener('themePageReady', iniciarClonar);
+document.addEventListener('gloryRecarga', iniciarClonar);

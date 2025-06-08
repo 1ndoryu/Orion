@@ -29,8 +29,6 @@ function themeSetup()
 
 add_action('after_setup_theme', 'themeSetup');
 
-add_action('after_switch_theme', 'checkAndSetupDefaultMenus');
-
 function themeEnqueueStyles()
 {
     wp_enqueue_style('themeStyle', get_stylesheet_uri());

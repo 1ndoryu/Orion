@@ -55,3 +55,27 @@ body {
     height: 100vh;
     overflow: hidden;
 }
+
+
+.icons {
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    gap: 20px;
+}
+
+.menu .icons svg {
+    color: var(--blanco) !important;
+    fill: var(--blanco);
+    height: 17px !important;
+    width: 17px !important;
+}
+
+.menu.sidebar .end {
+    margin-top: auto;
+}
+
+.menu .icons a {
+    height: 16px;
+    cursor: pointer;
+}

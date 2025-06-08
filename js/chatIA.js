@@ -9,7 +9,7 @@ function configurarChatIA() {
     //estadoConexion.className = 'estado-conexion-ws';
     //bloqueChat.insertBefore(estadoConexion, bloqueChat.firstChild);
 
-    const idUsuario = window.gloryAjaxNavConfig?.idUsuario || null;
+    const idUsuario = window.dataGlobal?.idUsuario || null;
 
     const componentesFaltantes = [];
     if (!contenedorConversacion) componentesFaltantes.push('.Conversacion');
@@ -127,7 +127,7 @@ function configurarChatIA() {
         agregarMensajeInterfaz('IA está pensando...', 'info');
 
         try {
-            const respuestaAjax = await GloryAjax('ajaxIA', {instruccion: mensajeUsuario});
+            const respuestaAjax = await gloryAjax('ajaxIA', {instruccion: mensajeUsuario});
             if (!respuestaAjax.success) {
                 const elementoPensando = document.querySelector('.mensaje-info');
                 if (elementoPensando) elementoPensando.remove();
@@ -156,9 +156,4 @@ function configurarChatIA() {
     conectarWebSocket();
 }
 
-// Asegurarse de que el DOM esté cargado
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', configurarChatIA);
-} else {
-    configurarChatIA();
-}
+document.addEventListener('gloryRecarga', configurarChatIA);

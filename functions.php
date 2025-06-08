@@ -64,3 +64,48 @@ function fuentes()
     echo '<link rel="preload" href="' . $theme_url . '/assets/fonts/SourceSans3-Bold.woff2" as="font" type="font/woff2" crossorigin>';
 }
 add_action('wp_head', 'fuentes', 1);
+
+/*
+function activarModoMantenimiento()
+{
+
+    $titulo = 'Mantenimiento';
+    $html = <<<HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>$titulo</title>
+	<style>
+		body {
+			background-color: #050505;
+		}
+        html {
+    height: 100%;
+    background: #050505;
+    display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    body#error-page {
+        border: unset;
+    }
+    body {
+        background-color: #050505;
+        border: unset !important;
+        box-shadow: unset;
+    }
+	</style>
+</head>
+<body>
+	<h1>2upra pronto volverá y será genial</h1>
+</body>
+</html>
+HTML;
+
+    wp_die($html, $titulo, ['response' => 503, 'back_link' => false]);
+}
+
+add_action('template_redirect', 'activarModoMantenimiento');
+*/
