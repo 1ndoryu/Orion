@@ -1,5 +1,10 @@
 <?php
 
+use Glory\Manager\CreditosManager;
+
+$usuarioId = get_current_user_id();
+$creditosUser = CreditosManager::getCreditos($usuarioId);
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -35,7 +40,10 @@
             </div>
 
             <div class="end">
-
+                <div class="contadorCreditos">
+                    <? echo $GLOBALS['pro']; ?>
+                    <?php echo $creditosUser; ?>
+                </div>
             </div>
         </header>
 

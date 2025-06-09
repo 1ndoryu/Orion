@@ -3,6 +3,7 @@
 use Glory\Core\PageManager;
 use Glory\Core\ScriptManager;
 use Glory\Core\StyleManager;
+use Glory\Manager\CreditosManager;
 
 ScriptManager::setGlobalDevMode(true);
 ScriptManager::setThemeVersion('0.1.2');
@@ -19,6 +20,8 @@ ScriptManager::register();
 StyleManager::register();
 PageManager::register();
 
+CreditosManager::init();
+CreditosManager::recargaPeriodica(true, 10, 1);
 
 function themeSetup()
 {
