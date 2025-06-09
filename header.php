@@ -11,77 +11,93 @@
     <?php wp_head(); ?>
 </head>
 
-<body>
+<?php if (logeado()) { ?>
 
-    <header class="header">
+    <body>
+        <header class="header">
 
-        <div class="pestanas">
+            <div class="pestanas">
 
-        </div>
+            </div>
 
-        <div class="buscador">
-            <input type="search"
-                id="busquedaPrincipal"
-                class="busqueda"
-                placeholder="Ingresa tu busqueda"
-                data-tipos="misiones,perfiles"
-                data-cantidad="5"
-                data-target="#resultado"
-                data-renderer="renderizadorGeneral"
-                data-callback-show="mostrarFondo"
-                data-callback-hide="ocultarFondo"
-                autocomplete="off">
-        </div>
+            <div class="buscador">
+                <input type="search"
+                    id="busquedaPrincipal"
+                    class="busqueda"
+                    placeholder="Ingresa tu busqueda"
+                    data-tipos="mision"
+                    data-cantidad="5"
+                    data-target="#resultado"
+                    data-renderer="renderizadorGeneral"
+                    data-callback-show="mostrarFondo"
+                    data-callback-hide="ocultarFondo"
+                    autocomplete="off">
+            </div>
 
-        <div class="end">
+            <div class="end">
 
-        </div>
-    </header>
+            </div>
+        </header>
 
-    <aside class="menu sidebar">
-        <div class="icons">
-            <a href="<? echo home_url('/'); ?>">
-                <?php echo $GLOBALS['twobox'] ?>
-            </a>
-
-            <a href="<? echo home_url('/'); ?>" style="display: none;">
-                <? echo $GLOBALS['iconoinicio'];
-                ?>
-            </a>
-
-            <a href="<? echo home_url('/feed'); ?>">
-                <? echo $GLOBALS['iconSocial']; ?>
-            </a>
-
-            <a href="<? echo home_url('/packs'); ?>">
-                <? echo $GLOBALS['iconoColec']; ?>
-            </a>
-
-            <a href="<? echo home_url('/sello'); ?>">
-                <? echo $GLOBALS['iconoNube']; ?>
-            </a>
-
-            <a href="<? echo home_url('/music'); ?>">
-                <? echo $GLOBALS['iconoMusic']; ?>
-            </a>
-
-
-        </div>
-        <div class="end">
+        <aside class="menu sidebar">
             <div class="icons">
-
-                <a class="openModal" data-modal="modalNotificaciones">
-                    <? echo $GLOBALS['icononoti']; ?>
+                <a href="<? echo home_url('/'); ?>">
+                    <?php echo $GLOBALS['twobox'] ?>
                 </a>
 
-                <a class="openModal" data-modal="modalConfiguracion">
-                    <?php echo $GLOBALS['config'] ?>
+                <a href="<? echo home_url('/'); ?>" style="display: none;">
+                    <? echo $GLOBALS['iconoinicio'];
+                    ?>
+                </a>
+
+                <a href="<? echo home_url('/feed'); ?>">
+                    <? echo $GLOBALS['iconSocial']; ?>
+                </a>
+
+                <a href="<? echo home_url('/packs'); ?>">
+                    <? echo $GLOBALS['iconoColec']; ?>
+                </a>
+
+                <a href="<? echo home_url('/sello'); ?>">
+                    <? echo $GLOBALS['iconoNube']; ?>
+                </a>
+
+                <a href="<? echo home_url('/music'); ?>">
+                    <? echo $GLOBALS['iconoMusic']; ?>
                 </a>
 
 
             </div>
-        </div>
-    </aside>
+            <div class="end">
+                <div class="icons">
 
+                    <a class="openModal" data-modal="modalNotificaciones">
+                        <? echo $GLOBALS['icononoti']; ?>
+                    </a>
+
+                    <a class="openModal" data-modal="modalConfiguracion">
+                        <?php echo $GLOBALS['config'] ?>
+                    </a>
+
+
+                </div>
+            </div>
+        </aside>
+    <?php } ?>
+    <?php if (!logeado()) { ?>
+        <header class="headerNoLogin">
+            <a href="<? echo home_url('/'); ?>">
+                <?php echo $GLOBALS['twobox'] ?>
+            </a>
+
+            <nav class="flex gap20">
+                <a href="<? echo home_url('/'); ?>">Test</a>
+                <a href="<? echo home_url('/'); ?>">Test</a>
+                <a href="<? echo home_url('/'); ?>">Test</a>
+                <a href="<? echo home_url('/'); ?>">Test</a>
+            </nav>
+
+        </header>
+    <?php  } ?>
 
     <main id="contentAjax" class="main contentAjax">

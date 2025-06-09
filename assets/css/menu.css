@@ -60,7 +60,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 6px;
-    gap: 20px;
+    gap: 21px;
 }
 
 .menu .icons svg {
@@ -87,6 +87,7 @@ body {
 
 .busqueda {
     background: none;
+    border-bottom: solid 1px #252525 !important;
     border: solid 1px #252525;
     border-radius: 5px;
     padding: 4px 10px !important;
@@ -101,3 +102,46 @@ body {
     font-size: 10px;
 }
 
+.headerNoLogin {
+    z-index: 999;
+    display: flex;
+    flex-direction: row;
+    height: unset;
+    border-bottom: var(--borde);
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
+    width: 96% !important;
+    border: var(--borde);
+    top: 40px;
+    border-radius: 100px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: fixed;
+    background: #53535314;
+    backdrop-filter: blur(10px);
+    margin: 0;
+    min-height: 52px;
+    padding: 15px 20px !important;
+    gap: 20px;
+}
+
+.headerNoLogin nav a{
+    height: 20px;
+    font-size: 13px;
+    padding: 0px;
+    color: white;
+    color: white;
+    opacity: 0.8;
+    text-decoration: none;
+
+}
+
+.headerNoLogin a {
+    height: 19px;
+}
+
+.headerNoLogin svg {
+    height: 18px;
+    width: 18px;
+}
