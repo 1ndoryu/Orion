@@ -1,0 +1,13 @@
+div#modalCrearPublicacion {
+    width: 600px;
+}
+
+#modalCrearPublicacion .imagenPerfil img {
+    aspect-ratio: 1 / 1;
+    border-radius: 200px;
+    max-height: 35px;
+}
+
+div#opcionesPublicacion {
+    padding: 15px 15px;
+}

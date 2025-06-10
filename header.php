@@ -12,6 +12,9 @@ $creditosUser = CreditosManager::getCreditos($usuarioId);
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Source+Sans+3:wght@200..900&display=swap');
+    </style>
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <?php wp_head(); ?>
 </head>
@@ -43,6 +46,11 @@ $creditosUser = CreditosManager::getCreditos($usuarioId);
                 <div class="contadorCreditos">
                     <? echo $GLOBALS['pro']; ?>
                     <?php echo $creditosUser; ?>
+                </div>
+                <button data-submenu="menuPerfil" data-posicion="abajo">Test</button>
+                <div id="menuPerfil" class="submenus">
+                    <a class="openModal" data-modal="modalCrearPost">Opción 1</a>
+                    <a>Opción 2</a>
                 </div>
             </div>
         </header>

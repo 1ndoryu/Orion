@@ -26,7 +26,7 @@
     background: #53535314;
     backdrop-filter: blur(10px);
     min-height: 50px;
-    z-index: 999999;
+    z-index: 1000;
     border: var(--borde);
     border-left: unset;
 }

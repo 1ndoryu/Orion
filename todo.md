@@ -1,11 +1,14 @@
 - [x] El menu debe tener una version para usuarios no logeados
 - [x] Sistema de creditos
-- [ ] Generalizar creacion de formularios
-    - **Planificacion** Como debería ser los formularios generico, el js funciona correctamente, hace falta un servicio que maneje las acciones, el ajax que manaje correctamente las solicitudes. Lo que no se como generalizar 1, las acciones bueno, cada formulario envia una accion en los datos, supongo que el usuario manualmente definirá las acciones en su codigo, no se como hacerlo, tiene que ser facil y sencillo. Luego, una forma facil y sencilla de construir los formularios, para todo esto necesito ejemplos, antes de proceder. 
-- [ ] Sistema de login
-- [ ] Componente para agregar contenido
+- [x] Generalizar creacion de formularios
+- [x] Generalizar mostrar datos por defecto en los formularios
+- [x] Generalizar la forma en la que se guardan los datos 
+
+- [x] Funcionalidad Submenus
 - [ ] Formulario para agregar contenido
 - [ ] Componente del chat 
 - [ ] Componente de imagen de perfil
 - [ ] Sistema de cache
 - [ ] Sistema de notificaciones con socket
+- [ ] Cambiar nombre de usuario en el 
+- [ ] Sistema de login
