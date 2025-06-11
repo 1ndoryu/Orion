@@ -1,25 +1,25 @@
 <?php 
 
+use Glory\Core\AssetManager;
 use Glory\Core\PageManager;
-use Glory\Core\ScriptManager;
-use Glory\Core\StyleManager;
 use Glory\Manager\CreditosManager;
 
-ScriptManager::setGlobalDevMode(true);
-ScriptManager::setThemeVersion('0.1.2');
+// Configuración unificada para todos los assets a través de AssetManager
+AssetManager::setGlobalDevMode(true);
+AssetManager::setThemeVersion('0.1.2');
 
-StyleManager::setGlobalDevMode(true);
-StyleManager::setThemeVersion('0.1.2');
+// Definición de carpetas de assets
+AssetManager::defineFolder('script', '/js/');
+AssetManager::defineFolder('style', '/assets/css/');
 
-ScriptManager::defineFolder('/js');
-StyleManager::defineFolder('/assets/css');
-
+// Definición de páginas
 PageManager::define('home');
 
-ScriptManager::register();
-StyleManager::register();
+// Registro de los gestores del framework
+AssetManager::register();
 PageManager::register();
 
+// Inicialización de otros servicios
 CreditosManager::init();
 CreditosManager::recargaPeriodica(true, 10, 1);
 
@@ -29,7 +29,6 @@ function themeSetup()
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
 }
-
 add_action('after_setup_theme', 'themeSetup');
 
 function themeEnqueueStyles()

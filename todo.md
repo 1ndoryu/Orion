@@ -10,7 +10,10 @@
 - [x] Mejorar sistema de previews
     - [ ] Poder quitar elementos subidos.
     - [ ] Subida de fondo
+    - [ ] Preview de audio con wavesurfer
+    - [ ] Comprobar que se suben imagenes
 - [ ] Formulario para subir sample
+- [ ] Todos los textareas expandirse automaticamente
 - [ ] Formulario para hacer publicacion 
 - [ ] Formulario para agregar contenido
 - [ ] Componente del chat 

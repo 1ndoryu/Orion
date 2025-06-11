@@ -21,7 +21,7 @@ function modalConfiguracion()
                 'textoPreview' => 'Arrastra tu foto de perfil',
                 'limite' => 2048576, 
                 'accept' => 'image/*',
-                'classContainer' => 'imagenInput'
+                'classContainer' => 'preview imagenInput'
             ]);
 
             echo Form::campoTexto([
