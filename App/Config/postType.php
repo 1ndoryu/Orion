@@ -37,4 +37,16 @@ PostTypeManager::define(
     'Resúmenes'
 );
 
+PostTypeManager::define(
+    'sample',
+    [
+        'has_archive' => true,
+        'rewrite'     => ['slug' => 'samples'],
+        'menu_icon'   => 'dashicons-media-audio',
+        'supports'    => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'],
+    ],
+    'Sample',
+    'Samples'
+);
+
 PostTypeManager::register();

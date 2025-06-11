@@ -6,7 +6,7 @@
 - [x] Funcionalidad Submenus
 - [x] Campos obligatorios en los formularios
 - [x] Valores minimos para campos obligatorios
-- [ ] Generalizacion de subida de post
+- [x] Generalizacion de subida de post
 - [x] Mejorar sistema de previews
     - [ ] Poder quitar elementos subidos.
     - [ ] Subida de fondo
