@@ -27,8 +27,11 @@ function modalSubirSample()
             </div>
 
             <? echo Form::inicio([
-                'metaTarget' => 'post',
-                'extraClass' => 'flex gap columna'
+                'extraClass' => 'flex gap columna',
+                'atributos'  => [ 
+                    'data-post-type' => 'sample', 
+                    'data-post-status' => 'publish'
+                ]
             ]) ?>
 
             <? echo Form::campoTextarea([
@@ -36,9 +39,10 @@ function modalSubirSample()
                 'placeholder' => 'Publica tu sample, puedes agregar tags usando #',
                 'rows' => 2,
                 'limite' => 200,
+                'minimo' => 10,
                 'classContainer' => 'postContent',
                 'obligatorio' => 'true',
-                'alertaObligatorio' => 'Por favor, sube al menos un audio.'
+                'alertaObligatorio' => 'Por favor, agrega una descripcion.'
             ]) ?>
 
             <div class="previewsForms flex w100 gap oculto">
@@ -60,7 +64,7 @@ function modalSubirSample()
                     'textoPreview' => 'Arrastra o selecciona audios',
                     'accept' => 'audio/*',
                     'classContainer' => 'previewAudio w100 oculto',
-                    
+
                 ]) ?>
             </div>
 

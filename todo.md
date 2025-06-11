@@ -4,7 +4,8 @@
 - [x] Generalizar mostrar datos por defecto en los formularios
 - [x] Generalizar la forma en la que se guardan los datos 
 - [x] Funcionalidad Submenus
-- [ ] Campos obligatorios en los formularios
+- [x] Campos obligatorios en los formularios
+- [x] Valores minimos para campos obligatorios
 - [ ] Generalizacion de subida de post
 - [x] Mejorar sistema de previews
     - [ ] Poder quitar elementos subidos.
