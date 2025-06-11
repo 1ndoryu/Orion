@@ -3,8 +3,14 @@
 - [x] Generalizar creacion de formularios
 - [x] Generalizar mostrar datos por defecto en los formularios
 - [x] Generalizar la forma en la que se guardan los datos 
-
 - [x] Funcionalidad Submenus
+- [ ] Campos obligatorios en los formularios
+- [ ] Generalizacion de subida de post
+- [x] Mejorar sistema de previews
+    - [ ] Poder quitar elementos subidos.
+    - [ ] Subida de fondo
+- [ ] Formulario para subir sample
+- [ ] Formulario para hacer publicacion 
 - [ ] Formulario para agregar contenido
 - [ ] Componente del chat 
 - [ ] Componente de imagen de perfil

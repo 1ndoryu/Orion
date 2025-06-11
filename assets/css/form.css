@@ -1,13 +1,27 @@
-div#modalCrearPublicacion {
+div#modalSubirSample {
     width: 600px;
 }
 
-#modalCrearPublicacion .imagenPerfil img {
+#modalSubirSample .imagenPerfil img {
     aspect-ratio: 1 / 1;
     border-radius: 200px;
-    max-height: 35px;
+    max-height: 33px;
 }
 
 div#opcionesPublicacion {
     padding: 15px 15px;
+}
+
+.botonesSubirSample button {
+    height: 15px;
+    padding: 8px 10px;
+}
+.botonesSubirSample {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+button.dataSubir.crearPublicacion.borde {
+    margin-left: auto;
 }

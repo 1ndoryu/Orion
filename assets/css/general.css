@@ -1,0 +1,16 @@
+.infoUser {
+    display: flex;
+    gap: 5px;
+}
+
+.infoUser p {
+    font-size: 14px;
+    FONT-WEIGHT: 500;
+}
+.infoUser {
+    display: flex
+;
+    gap: 10px;
+    align-items: center;
+    align-content: center;
+}
