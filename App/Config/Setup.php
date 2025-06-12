@@ -15,10 +15,6 @@ AssetManager::defineFolder('style', '/assets/css/');
 // Definición de páginas
 PageManager::define('home');
 
-// Registro de los gestores del framework
-AssetManager::register();
-PageManager::register();
-
 // Inicialización de otros servicios
 CreditosManager::init();
 CreditosManager::recargaPeriodica(true, 10, 1);
@@ -30,11 +26,5 @@ function themeSetup()
     add_theme_support('post-thumbnails');
 }
 add_action('after_setup_theme', 'themeSetup');
-
-function themeEnqueueStyles()
-{
-    wp_enqueue_style('themeStyle', get_stylesheet_uri());
-}
-add_action('wp_enqueue_scripts', 'themeEnqueueStyles');
 
 add_filter('show_admin_bar', '__return_false');

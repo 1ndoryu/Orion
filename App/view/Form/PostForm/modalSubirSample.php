@@ -1,6 +1,6 @@
 <?
 
-use Glory\Component\FormBuilder as Form;
+use Glory\Components\FormBuilder as Form;
 
 /**
  * Renderiza el modal para crear una nueva publicación.
